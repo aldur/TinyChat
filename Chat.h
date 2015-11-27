@@ -2,10 +2,13 @@
 #define CHAT_H
 
 enum {
+    MSG_LEN = 60,
+
     AM_CHAT_SERIAL_MSG = 0x89,
     AM_CHAT_MSG = 0x99,
-    TIMER_PERIOD_MILLI = 250,
-    MSG_LEN = 60
+
+    SLEEP_TIMER = 750,
+    DUTY_TIMER = 250
 };
 
 typedef nx_struct chat_msg {

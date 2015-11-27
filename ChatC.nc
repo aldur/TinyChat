@@ -12,6 +12,8 @@ module ChatC {
     uses interface SplitControl as SerialControl;
     uses interface AMSend as SerialSend;
     uses interface Receive as SerialReceive;
+
+    uses interface Timer<TMilli>;
 } implementation {
     bool radio_busy = FALSE;
     bool serial_busy = FALSE;
@@ -19,33 +21,56 @@ module ChatC {
     message_t radio_pkt;
     message_t serial_pkt;
 
-/* --- Boot --- */
+    /** Should the iface be on? */
+    bool on_duty;
+
+    /* --- Boot --- */
 
     event void Boot.booted() {
         call SerialControl.start();
         call AMControl.start();
     }
 
-/* --- Control events --- */
+    /* --- Control events --- */
 
     event void SerialControl.startDone(error_t err) {
         if (err != SUCCESS) {
-            call AMControl.start();
+            call SerialControl.start();
         }
     }
 
-    event void SerialControl.stopDone(error_t err) { }
+    event void SerialControl.stopDone(error_t err) {
+        if (err != SUCCESS) {
+            call SerialControl.stop();
+        }
+    }
 
     event void AMControl.startDone(error_t err) {
         if (err == SUCCESS) {
-            // TODO: implement duty cycles.
+            on_duty = 1;
+            call Timer.startOneShot(DUTY_TIMER);
         } else {
             call AMControl.start();
         }
     }
 
     event void AMControl.stopDone(error_t err) {
-        // TODO: implement duty cycles.
+        if (err == SUCCESS) {
+            on_duty = 0;
+            call Timer.startOneShot(SLEEP_TIMER);
+        } else {
+            call AMControl.stop();
+        }
+    }
+
+    /* --- Timer events --- */
+
+    event void Timer.fired() {
+        if (on_duty) {
+            call AMControl.stop();
+        } else {
+            call AMControl.start();
+        }
     }
 
     /* --- Send calls --- */
