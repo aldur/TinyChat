@@ -22,8 +22,7 @@ class Chat:
     # Called by the MoteIF's receive thread when a new message
     # is received
     def receive(self, src, msg):
-        print("Received message: {}".format(msg))
-        print("Received message: {}".format("".join([chr(c) for c in msg])))
+        print("Received message: {}".format(msg.data))
 
     def send(self, msg):
         print "Sending message: {}...".format(msg)
