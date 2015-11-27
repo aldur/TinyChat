@@ -26,6 +26,10 @@ module ChatC {
     /** Should the iface be on? */
     bool on_duty;
 
+    /** A packet was pending to be sent while radio was off. */
+    bool is_pending;
+    void radio_immediate_send();
+
     /* --- Boot --- */
 
     event void Boot.booted() {
@@ -53,9 +57,14 @@ module ChatC {
 
     event void AMControl.startDone(error_t err) {
         if (err == SUCCESS) {
-            on_duty = 1;
+            on_duty = TRUE;
             call Leds.set(1);
+
             call Timer.startOneShot(DUTY_TIMER);
+
+            if (is_pending) {
+                radio_immediate_send();
+            }
         } else {
             call AMControl.start();
         }
@@ -63,7 +72,7 @@ module ChatC {
 
     event void AMControl.stopDone(error_t err) {
         if (err == SUCCESS) {
-            on_duty = 0;
+            on_duty = FALSE;
             call Leds.set(0);
             call Timer.startOneShot(SLEEP_TIMER);
         } else {
@@ -83,6 +92,14 @@ module ChatC {
 
     /* --- Send calls --- */
 
+    void radio_immediate_send() {
+        if (call AMSend.send(AM_BROADCAST_ADDR,
+                    &radio_pkt, sizeof(chat_msg)) == SUCCESS) {
+            radio_busy = TRUE;
+            is_pending = FALSE;
+        }
+    }
+
     /**
      * Send message through radio.
      */
@@ -98,9 +115,12 @@ module ChatC {
             spkt->nodeid = node_id;
             memcpy(spkt->msg, msg, sizeof(spkt->msg));
 
-            if (call AMSend.send(AM_BROADCAST_ADDR,
-                        &radio_pkt, sizeof(chat_msg)) == SUCCESS) {
-                radio_busy = TRUE;
+            if (!on_duty) {
+                is_pending = TRUE;
+                call Timer.stop();
+                call AMControl.start();
+            } else {
+                radio_immediate_send();
             }
         }
     }
