@@ -8,6 +8,7 @@ module ChatC {
     uses interface AMPacket;
     uses interface AMSend;
     uses interface Receive as AMReceive;
+    uses interface PacketLink;
 
     uses interface SplitControl as SerialControl;
     uses interface AMSend as SerialSend;
@@ -29,6 +30,10 @@ module ChatC {
     event void Boot.booted() {
         call SerialControl.start();
         call AMControl.start();
+
+        /** Setup the PacketLink module */
+        call PacketLink.setRetries(&radio_pkt, MAX_RETRIES);
+        call PacketLink.setRetryDelay(&radio_pkt, RETRY_DELAY);
     }
 
     /* --- Control events --- */

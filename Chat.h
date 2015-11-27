@@ -8,7 +8,10 @@ enum {
     AM_CHAT_MSG = 0x99,
 
     SLEEP_TIMER = 750,
-    DUTY_TIMER = 250
+    DUTY_TIMER = 250,
+
+    MAX_RETRIES = 3,
+    RETRY_DELAY = 100
 };
 
 typedef nx_struct chat_msg {
