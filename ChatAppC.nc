@@ -13,6 +13,7 @@ implementation {
     components SerialActiveMessageC as Serial;
 
     components new TimerMilliC() as Timer;
+    components LedsC;
 
     App.Boot -> MainC;
 
@@ -28,4 +29,5 @@ implementation {
     App.SerialSend -> Serial.AMSend[AM_CHAT_SERIAL_MSG];
 
     App.Timer -> Timer;
+    App.Leds -> LedsC;
 }

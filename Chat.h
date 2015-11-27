@@ -7,8 +7,8 @@ enum {
     AM_CHAT_SERIAL_MSG = 0x89,
     AM_CHAT_MSG = 0x99,
 
-    SLEEP_TIMER = 750,
-    DUTY_TIMER = 250,
+    SLEEP_TIMER = 1000,
+    DUTY_TIMER = 500,
 
     MAX_RETRIES = 3,
     RETRY_DELAY = 100

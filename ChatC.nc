@@ -15,6 +15,7 @@ module ChatC {
     uses interface Receive as SerialReceive;
 
     uses interface Timer<TMilli>;
+    uses interface Leds;
 } implementation {
     bool radio_busy = FALSE;
     bool serial_busy = FALSE;
@@ -53,6 +54,7 @@ module ChatC {
     event void AMControl.startDone(error_t err) {
         if (err == SUCCESS) {
             on_duty = 1;
+            call Leds.set(1);
             call Timer.startOneShot(DUTY_TIMER);
         } else {
             call AMControl.start();
@@ -62,6 +64,7 @@ module ChatC {
     event void AMControl.stopDone(error_t err) {
         if (err == SUCCESS) {
             on_duty = 0;
+            call Leds.set(0);
             call Timer.startOneShot(SLEEP_TIMER);
         } else {
             call AMControl.stop();
